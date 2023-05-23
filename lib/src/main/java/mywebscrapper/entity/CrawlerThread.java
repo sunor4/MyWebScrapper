@@ -55,7 +55,7 @@ public class CrawlerThread implements Runnable {
 						currentNumOfUrls++;
 						Thread thread = new Thread(new CrawlerThread(linkUrl, maxNumOfUrls, currentDepth + 1, maxDepth,
 								isUnique, cacheMap));
-						thread.run();
+						thread.start();
 					}
 				}
 			}

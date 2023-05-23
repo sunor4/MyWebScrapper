@@ -18,6 +18,6 @@ public class MyWebScrapper {
 
 	public void run(String url, int maxNumOfUrls, int depth, boolean isUnique) {
 		Thread thread = new Thread(new CrawlerThread(url, maxNumOfUrls, 0, depth, isUnique, cacheMap));
-		thread.run();
+		thread.start();
 	}
 }
