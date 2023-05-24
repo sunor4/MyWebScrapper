@@ -26,6 +26,6 @@ public class FileManager {
 	}
 	
 	private String getFormattedUrlStringForFileSave(String url) {
-		return url.replaceAll("http(s)?://|www\\.", "").replaceAll("[\\\\/:*?\"<>|]", "_");
+		return url.replaceAll("http(s)?://|www\\.", "").replaceAll("[^a-zA-Z0-9-_\\.]", "_");
 	}
 }
