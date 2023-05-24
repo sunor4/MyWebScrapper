@@ -78,20 +78,4 @@ public class CrawlerThread implements Runnable {
 
 		return document;
 	}
-
-	private void saveDocument(String url, int depth, String fileContent) {
-		url = scrapperUtils.getFormattedUrlStringForFileSave(url);
-		final String fullDirPath = String.format("./target/%s/", depth);
-		final String fullFilePath = String.format("%s/%s.html", fullDirPath, url);
-		final Path pathToDir = Paths.get(fullDirPath);
-		final Path pathToFile = Paths.get(fullFilePath);
-		try {
-			Files.createDirectories(pathToDir);
-			File newFile = pathToFile.toFile();
-			newFile.createNewFile();
-			Files.write(pathToFile, Arrays.asList(fileContent), StandardCharsets.UTF_8);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }
