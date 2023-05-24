@@ -17,7 +17,7 @@ public class ScrapperUtils {
 	
 	public boolean isUrlValidAndUnique(String url, boolean isUnique, Map<String, Boolean> cacheMap) {
 		boolean isUniqueAndNotInMap = isUnique && !cacheMap.containsKey(url);
-		return !isUrlValid(url) && (!isUnique || isUniqueAndNotInMap);
+		return isUrlValid(url) && (!isUnique || isUniqueAndNotInMap);
 	}
 	
 	public String getFormattedUrlStringForFileSave(String url) {
