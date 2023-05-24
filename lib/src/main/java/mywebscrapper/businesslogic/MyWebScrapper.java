@@ -1,5 +1,6 @@
 package mywebscrapper.businesslogic;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,7 @@ import mywebscrapper.entity.CrawlerThread;
 import mywebscrapper.utils.ScrapperUtils;
 
 public class MyWebScrapper {
-	Map<String, Boolean> cacheMap = new HashMap<String, Boolean>();
+	Map<String, Boolean> cacheMap = Collections.synchronizedMap(new HashMap<String, Boolean>());
 	private String url = "";
 	private int maxNumOfUrls = 0;
 	private int depth = 0;
@@ -29,7 +30,7 @@ public class MyWebScrapper {
 		final String maxNumOfUrlsStr = args[1];
 		final String depthStr = args[2];
 		final String isUniqueStr = args[3];
-		if (scrapperUtils.isUrlValid(url)) {
+		if (!scrapperUtils.isUrlValid(url)) {
 			throw new IllegalArgumentException(String.format("%s is not a valid url", url));
 		} else {
 			this.url = url;
