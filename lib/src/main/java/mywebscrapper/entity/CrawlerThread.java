@@ -51,7 +51,7 @@ public class CrawlerThread implements Runnable {
 				for (int i = 0, currentNumOfUrls = 0; i < links.size() && currentNumOfUrls < maxNumOfUrls; i++) {
 					String linkUrl = links.get(i).absUrl("href");
 					if (scrapperUtils.isUrlValidAndUnique(linkUrl, isUnique, cacheMap)) {
-						System.out.println(String.format("Thread %s-%s initiated", currentDepth, i));
+						System.out.println(String.format("Thread %s-%s initiated - %s", currentDepth, i, linkUrl));
 						this.cacheMap.putIfAbsent(linkUrl, true);
 						currentNumOfUrls++;
 						Thread thread = new Thread(new CrawlerThread(linkUrl, maxNumOfUrls, currentDepth + 1, maxDepth,
