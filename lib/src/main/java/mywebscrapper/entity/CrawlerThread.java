@@ -1,81 +1,68 @@
 package mywebscrapper.entity;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Phaser;
 
-import javax.ws.rs.core.Response;
-
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-
-import mywebscrapper.utils.ScrapperUtils;
 
 public class CrawlerThread implements Runnable {
 	private final String url;
 	private final int maxNumOfUrls;
-	private final Map<String, Boolean> cacheMap;
+	private final Set<String> cacheSet;
 	private int currentDepth;
 	private final int maxDepth;
 	private final boolean isUnique;
-	private final ScrapperUtils scrapperUtils = new ScrapperUtils();
+	private final ExecutorService executorService;
+	private final DocumentFetcher documentFetcher = new DocumentFetcher();
+	private final UrlExtractor urlExtractor = new UrlExtractor();
+	private final FileManager fileManager = new FileManager();
+	private final Phaser phaser;
 
 	public CrawlerThread(String url, int maxNumOfUrls, int currentDepth, int maxDepth, boolean isUnique,
-			Map<String, Boolean> cacheMap) {
+			Set<String> cacheSet, ExecutorService executorService, Phaser phaser) {
 		this.url = url;
 		this.maxNumOfUrls = maxNumOfUrls;
+		this.cacheSet = cacheSet;
 		this.currentDepth = currentDepth;
 		this.maxDepth = maxDepth;
 		this.isUnique = isUnique;
-		this.cacheMap = cacheMap;
+		this.executorService = executorService;
+		this.phaser = phaser;
+		this.phaser.register();
 	}
 
 	@Override
 	public void run() {
-		crawl(url, maxNumOfUrls, maxDepth, isUnique);
-	}
+		System.out.println(String.format("%s - %s", currentDepth, url));
+		Document document = documentFetcher.getDocument(url, currentDepth);
+		if (document != null) {
+			fileManager.saveDocument(url, currentDepth, url);
+			if (currentDepth < maxDepth) {
+				Set<String> urls = urlExtractor.extractUrlsFromDocument(document, maxNumOfUrls, isUnique);
+				if (isUnique) {
+					urls.removeAll(cacheSet);
+				}
 
-	private void crawl(String url, int maxNumOfUrls, int maxDepth, boolean isUnique) {
-		Document document = getDocument(url, currentDepth);
-		if (currentDepth < maxDepth) {
-			if (document != null) {
-				List<Element> links = document.select("a[href]");
-				for (int i = 0, currentNumOfUrls = 0; i < links.size() && currentNumOfUrls < maxNumOfUrls; i++) {
-					String linkUrl = links.get(i).absUrl("href");
-					if (scrapperUtils.isUrlValidAndUnique(linkUrl, isUnique, cacheMap)) {
-						System.out.println(String.format("Thread %s-%s initiated - %s", currentDepth, i, linkUrl));
-						this.cacheMap.putIfAbsent(linkUrl, true);
-						currentNumOfUrls++;
-						Thread thread = new Thread(new CrawlerThread(linkUrl, maxNumOfUrls, currentDepth + 1, maxDepth,
-								isUnique, cacheMap));
-						thread.start();
+				int numOfThreads = Math.min(urls.size(), maxNumOfUrls);
+				int i = 0;
+				for (String newUrl : urls) {
+					if (i < numOfThreads) {
+						cacheSet.add(newUrl);
+						Thread thread = new Thread(new CrawlerThread(newUrl, maxNumOfUrls, currentDepth + 1, maxDepth,
+								isUnique, cacheSet, executorService, phaser));
+						try {
+							executorService.submit(thread);
+						} catch (Exception e) {
+							System.out.println("Rejected");
+						}
+					} else {
+						break;
 					}
 				}
 			}
 		}
-	}
-
-	private Document getDocument(String url, int depth) {
-		Connection connection = Jsoup.connect(url);
-		Document document = null;
-		try {
-			document = connection.get();
-			if (connection.response().statusCode() == Response.Status.OK.getStatusCode()) {
-				this.cacheMap.putIfAbsent(url, true);
-				saveDocument(url, depth, document.html());
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return document;
+		
+		phaser.arrive();
 	}
 }
