@@ -37,7 +37,7 @@ public class CrawlerThread implements Runnable {
 		System.out.println(String.format("%s - %s", currentDepth, url));
 		Document document = documentFetcher.getDocument(url, currentDepth);
 		if (document != null) {
-			fileManager.saveDocument(url, currentDepth, url);
+			fileManager.saveDocument(url, currentDepth, document.html());
 			if (currentDepth < maxDepth) {
 				Set<String> urls = urlExtractor.extractUrlsFromDocument(document, maxNumOfUrls, isUnique);
 				if (isUnique) {
@@ -53,6 +53,7 @@ public class CrawlerThread implements Runnable {
 								isUnique, cacheSet, executorService, phaser));
 						try {
 							executorService.submit(thread);
+							i++;
 						} catch (Exception e) {
 							System.out.println("Rejected");
 						}
