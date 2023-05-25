@@ -9,9 +9,11 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class FileManager {
+	private final String TARGET_FOLDER_NAME = "target";
+	
 	public void saveDocument(String url, int depth, String fileContent) {
 		url = getFormattedUrlStringForFileSave(url);
-		final String fullDirPath = String.format("./target/%s/", depth);
+		final String fullDirPath = String.format("./%s/%s/", TARGET_FOLDER_NAME, depth);
 		final String fullFilePath = String.format("%s/%s.html", fullDirPath, url);
 		final Path pathToDir = Paths.get(fullDirPath);
 		final Path pathToFile = Paths.get(fullFilePath);
