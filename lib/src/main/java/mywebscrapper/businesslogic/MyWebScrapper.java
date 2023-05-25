@@ -3,6 +3,7 @@ package mywebscrapper.businesslogic;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
@@ -25,7 +26,7 @@ public class MyWebScrapper {
 
 	public void run() {
 		ExecutorService executorService = Executors.newFixedThreadPool(maxNumOfUrls);
-		Set<String> cacheSet = Collections.synchronizedSet(new HashSet<String>());
+		Set<String> cacheSet = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
 		cacheSet.add(this.url);
 		Phaser phaser = new Phaser();
 		CrawlerThread thread = new CrawlerThread(url, maxNumOfUrls, 1, maxDepth, isUnique, cacheSet, executorService, phaser);
