@@ -6,7 +6,7 @@ import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-public class JsoupConnector {
+public class DocumentFetcher {
 	public Document getDocument(String url, int depth) {
 		Connection connection = Jsoup.connect(url);
 		Document document = null;
