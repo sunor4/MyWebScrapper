@@ -11,15 +11,19 @@ import mywebscrapper.utils.ScrapperUtils;
 
 public class UrlExtractor {
 	private final ScrapperUtils scrapperUtils = new ScrapperUtils();
-	
-	public Set<String> extractUrlsFromDocument(Document document, int maxNumOfUrls, boolean isUnique) {
+
+	public Set<String> extractUrlsFromDocument(Document document, int maxNumOfUrls, Set<String> cacheSet,
+			boolean isUnique) {
 		List<Element> extractedAnchors = document.select("a[href]");
 		Set<String> urls = new HashSet<String>();
-		
+
 		for (int i = 0; i < extractedAnchors.size() && urls.size() < maxNumOfUrls; i++) {
 			String anchorUrl = extractedAnchors.get(i).absUrl("href");
 			if (scrapperUtils.isUrlValid(anchorUrl)) {
-				urls.add(anchorUrl);
+				if (!isUnique || (isUnique && !cacheSet.contains(anchorUrl))) {
+					cacheSet.add(anchorUrl);
+					urls.add(anchorUrl);
+				}
 			}
 		}
 		

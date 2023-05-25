@@ -39,11 +39,7 @@ public class CrawlerThread implements Runnable {
 		if (document != null) {
 			fileManager.saveDocument(url, currentDepth, document.html());
 			if (currentDepth < maxDepth) {
-				Set<String> urls = urlExtractor.extractUrlsFromDocument(document, maxNumOfUrls, isUnique);
-				if (isUnique) {
-					urls.removeAll(cacheSet);
-				}
-
+				Set<String> urls = urlExtractor.extractUrlsFromDocument(document, maxNumOfUrls, cacheSet, isUnique);
 				int numOfThreads = Math.min(urls.size(), maxNumOfUrls);
 				int i = 0;
 				for (String newUrl : urls) {
